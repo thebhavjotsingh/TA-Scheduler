@@ -33,7 +33,7 @@ class App(QWidget):
 
     def setup_ui(self):
         """Initialize the modern UI with card-based layout"""
-        self.setWindowTitle(f"🚀 {DEFAULT_APP_NAME}")
+        self.setWindowTitle(f"{DEFAULT_APP_NAME}")
         if os.path.exists(ICON_PATH):
             self.setWindowIcon(QIcon(ICON_PATH))
         
