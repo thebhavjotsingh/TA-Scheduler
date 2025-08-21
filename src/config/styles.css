@@ -1,0 +1,371 @@
+/* TA Scheduler - Qt Compatible Dark Theme Stylesheet */
+
+/* Global Widget Styling */
+QWidget {
+  color: #cdd6f4;
+  font-family: "Segoe UI", "SF Pro Display", -apple-system, BlinkMacSystemFont,
+    sans-serif;
+  font-size: 11px;
+}
+
+QMainWindow {
+  background-color: #181825;
+}
+
+/* Text Areas - Responsive */
+QTextEdit {
+  background-color: transparent;
+  border: 1px solid #4b5563;
+  border-radius: 8px;
+  padding: 12px;
+  color: #f3f4f6;
+  font-family: "Consolas", "Monaco", "Courier New", monospace;
+  font-size: 11px;
+  line-height: 1.4;
+  min-height: 150px;
+  text-align: left;
+  vertical-align: top;
+}
+
+/* Card Components - Responsive */
+.card {
+  background-color: #313244;
+  border: 1px solid #45475a;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 4px;
+}
+
+/* File Drop Zones - Responsive */
+.file-drop {
+  background-color: transparent;
+  border: 2px dashed #6272a4;
+  border-radius: 8px;
+  padding: 15px;
+  text-align: center;
+  min-height: 120px;
+  min-width: 200px;
+  color: #f8f8f2;
+}
+
+.file-drop:hover {
+  border-color: #8be9fd;
+  background-color: rgba(42, 45, 66, 0.3);
+}
+
+.file-drop-active {
+  border-color: #50fa7b;
+  background-color: rgba(26, 35, 50, 0.3);
+}
+
+/* Button Styling */
+QPushButton {
+  background: qlineargradient(
+    x1: 0,
+    y1: 0,
+    x2: 0,
+    y2: 1,
+    stop: 0 #7c3aed,
+    stop: 1 #6366f1
+  );
+  height: 20px;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  padding: 5px 5px;
+  font-size: 12px;
+}
+
+QPushButton:hover {
+  background: qlineargradient(
+    x1: 0,
+    y1: 0,
+    x2: 0,
+    y2: 1,
+    stop: 0 #8b5cf6,
+    stop: 1 #7c3aed
+  );
+}
+
+QPushButton:pressed {
+  background: qlineargradient(
+    x1: 0,
+    y1: 0,
+    x2: 0,
+    y2: 1,
+    stop: 0 #6d28d9,
+    stop: 1 #5b21b6
+  );
+}
+
+QPushButton:disabled {
+  background: #374151;
+  color: #6b7280;
+}
+
+/* Secondary Button Variant */
+QPushButton[class="secondary"] {
+  background: #374151;
+  border: 1px solid #4b5563;
+}
+
+QPushButton[class="secondary"]:hover {
+  background: #4b5563;
+  border-color: #6b7280;
+}
+
+/* Primary Action Button */
+QPushButton[class="primary"] {
+  background: qlineargradient(
+    x1: 0,
+    y1: 0,
+    x2: 0,
+    y2: 1,
+    stop: 0 #7c3aed,
+    stop: 1 #6366f1
+  );
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: 600;
+  padding: 4px 16px; /* Increased horizontal padding for better text spacing */
+  font-size: 11px;
+  min-height: 20px;
+  /* Allow button to grow based on text content */
+}
+
+QPushButton[class="primary"]:hover {
+  background: qlineargradient(
+    x1: 0,
+    y1: 0,
+    x2: 0,
+    y2: 1,
+    stop: 0 #8b5cf6,
+    stop: 1 #7c3aed
+  );
+}
+
+QPushButton[class="primary"]:pressed {
+  background: qlineargradient(
+    x1: 0,
+    y1: 0,
+    x2: 0,
+    y2: 1,
+    stop: 0 #6d28d9,
+    stop: 1 #5b21b6
+  );
+}
+
+/* Input Controls */
+QSpinBox {
+  background-color: transparent;
+  border: 1px solid #4b5563;
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #f3f4f6;
+  font-size: 11px;
+  min-width: 80px;
+}
+
+QSpinBox:focus {
+  border-color: #7c3aed;
+  background-color: #374151;
+}
+
+QSpinBox::up-button,
+QSpinBox::down-button {
+  background-color: #4b5563;
+  border: none;
+  border-radius: 3px;
+  width: 16px;
+}
+
+QSpinBox::up-button:hover,
+QSpinBox::down-button:hover {
+  background-color: #6b7280;
+}
+
+/* Line Edit Controls */
+QLineEdit {
+  background-color: transparent;
+  border: 1px solid #4b5563;
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #f3f4f6;
+  font-size: 11px;
+  min-width: 80px;
+  selection-background-color: #7c3aed;
+}
+
+QLineEdit:focus {
+  border-color: #7c3aed;
+  background-color: #374151;
+}
+
+QLineEdit::placeholder {
+  color: #6b7280;
+}
+
+/* Text Areas */
+QTextEdit {
+  background-color: transparent;
+  border: 1px solid #4b5563;
+  border-radius: 8px;
+  padding: 12px;
+  color: #f3f4f6;
+  font-family: "Consolas", "Monaco", "Courier New", monospace;
+  font-size: 11px;
+  line-height: 1.4;
+  min-height: 300px;
+}
+
+QTextEdit:focus {
+  border-color: #7c3aed;
+  background-color: #2a2d42;
+}
+
+/* Labels */
+QLabel {
+  color: #e5e7eb;
+  font-weight: 500;
+  font-size: 12px;
+}
+
+/* Label Variants */
+QLabel[class="section-title"] {
+  font-size: 24px;
+  font-weight: 700;
+  color: #f3f4f6;
+  margin: 0;
+}
+
+QLabel[class="card-title"] {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f3f4f6;
+  margin-bottom: 8px;
+  text-align: left;
+  padding: 0;
+}
+
+QLabel[class="subtitle"] {
+  font-size: 13px;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+
+QLabel[class="hint"] {
+  font-size: 10px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+QLabel[class="control-label"] {
+  font-weight: 600;
+  color: #e5e7eb;
+  font-size: 12px;
+}
+
+QLabel[class="status"] {
+  font-size: 12px;
+  color: #10b981;
+  font-weight: 500;
+}
+
+/* File Drop Zone Labels */
+QLabel[class="file-icon"] {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+QLabel[class="file-title"] {
+  font-weight: 600;
+  font-size: 14px;
+  color: #f3f4f6;
+}
+
+QLabel[class="file-subtitle"] {
+  font-size: 11px;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+
+QLabel[class="file-path"] {
+  font-size: 10px;
+  color: #6b7280;
+  margin-top: 8px;
+}
+
+/* Progress Bar */
+QProgressBar {
+  background-color: transparent;
+  border: 1px solid #4b5563;
+  border-radius: 6px;
+  height: 8px;
+  text-align: center;
+  color: #f3f4f6;
+}
+
+QProgressBar::chunk {
+  background: qlineargradient(
+    x1: 0,
+    y1: 0,
+    x2: 1,
+    y2: 0,
+    stop: 0 #7c3aed,
+    stop: 1 #06b6d4
+  );
+  border-radius: 6px;
+}
+
+/* Scrollbar */
+QScrollBar:vertical {
+  background-color: transparent;
+  width: 12px;
+  border-radius: 6px;
+}
+
+QScrollBar::handle:vertical {
+  background-color: #6b7280;
+  border-radius: 6px;
+  min-height: 20px;
+}
+
+QScrollBar::handle:vertical:hover {
+  background-color: #9ca3af;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+  height: 0;
+}
+
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+  background: transparent;
+}
+
+/* Scroll Area */
+QScrollArea {
+  background: transparent;
+  border: none;
+}
+
+/* Frame Styling */
+QFrame {
+  border: none;
+}
+
+QFrame[class="card"] {
+  background-color: #313244;
+  border: 1px solid #45475a;
+  border-radius: 12px;
+}
+
+/* Success State for File Drop */
+QFrame[class="file-drop-success"] {
+  background-color: transparent;
+  border: 2px solid #10b981;
+  border-radius: 8px;
+}
