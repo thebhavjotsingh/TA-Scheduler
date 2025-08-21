@@ -18,13 +18,22 @@ MAX_LABS_PER_TA = 3  # Maximum number of labs a TA can be assigned to
 # --- GUI constants ---
 def get_icon_path():
     """Get the correct icon path whether running as script or PyInstaller bundle."""
+    import platform
+    
     if getattr(sys, 'frozen', False):
         # Running as PyInstaller bundle
         base_path = sys._MEIPASS
     else:
         # Running as script
         base_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-    return os.path.join(base_path, 'icon.ico')
+    
+    # Use platform-appropriate icon format
+    if platform.system() == 'Darwin':  # macOS
+        icon_name = 'icon.icns'
+    else:  # Windows, Linux
+        icon_name = 'icon.ico'
+    
+    return os.path.join(base_path, icon_name)
 
 ICON_PATH = get_icon_path()
 DEFAULT_APP_NAME = "TA Scheduler"

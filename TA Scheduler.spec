@@ -10,7 +10,7 @@ a = Analysis(
     pathex=[],
     binaries=binaries,
     datas=datas + [
-        ('icon.png', '.'), 
+        ('icon.icns', '.'), 
         ('icon.ico', '.'),
         ('src/config/styles.css', 'src/config/'),  # Include CSS stylesheet
     ],
@@ -47,21 +47,21 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
+    upx=False,  # Disable UPX compression for better icon quality
     console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='icon.ico',
+    icon='icon.icns',  # Use .icns for macOS
 )
 coll = COLLECT(
     exe,
     a.binaries,
     a.datas,
     strip=False,
-    upx=True,
+    upx=False,  # Disable UPX compression for better quality
     upx_exclude=[],
     name='TA Scheduler',
 )

@@ -20,6 +20,12 @@ import sys
 import os
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QIcon, QFont
+from PySide6.QtCore import Qt
+
+# Enable high DPI scaling BEFORE creating QApplication
+QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
+os.environ['QT_ENABLE_HIGHDPI_SCALING'] = '1'
+os.environ['QT_AUTO_SCREEN_SCALE_FACTOR'] = '1'
 
 # Add the src directory to the Python path for imports
 current_dir = os.path.dirname(os.path.abspath(__file__))

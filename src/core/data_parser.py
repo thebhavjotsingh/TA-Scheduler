@@ -148,6 +148,7 @@ def parse_requirements(file_path: str):
 def is_available(ta_name: str, slot_day: str, slot_start_hour: int, slot_end_hour: int, ta_data: pd.DataFrame) -> bool:
     """
     Check if a TA is available for every hour in a given time range on a specific day.
+    This function interprets the CSV as UNAVAILABILITY data (presence = unavailable).
 
     Args:
         ta_name (str): Name of the TA
@@ -175,21 +176,21 @@ def is_available(ta_name: str, slot_day: str, slot_start_hour: int, slot_end_hou
         next_str = convert_24_to_12_hour(next_hour)
         
         # Look for column matching this hour range  
-        found_hour = False
+        hour_is_available = True  # Default to available
         for col in ta_data.columns:
             # More robust matching - remove all spaces and compare
             col_normalized = re.sub(r'\s+', '', col)
             target_normalized = re.sub(r'\s+', '', f"[{current_str}to{next_str}]")
             
-            if target_normalized == col_normalized:
+            if target_normalized in col_normalized:
                 value = ta_row[col]
+                # If the day is listed in this UNAVAILABILITY column, TA is NOT available
                 if pd.notna(value) and slot_day in str(value):
-                    found_hour = True
-                    break
-                else:
-                    return False
+                    hour_is_available = False
+                break
         
-        if not found_hour:
+        # If any hour is unavailable, the whole slot is unavailable
+        if not hour_is_available:
             return False
         
         current_hour = next_hour

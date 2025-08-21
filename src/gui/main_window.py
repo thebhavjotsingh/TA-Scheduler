@@ -35,7 +35,11 @@ class App(QWidget):
         """Initialize the modern UI with card-based layout"""
         self.setWindowTitle(f"{DEFAULT_APP_NAME}")
         if os.path.exists(ICON_PATH):
-            self.setWindowIcon(QIcon(ICON_PATH))
+            # Create high-quality icon with multiple sizes
+            icon = QIcon(ICON_PATH)
+            # Ensure the icon is treated as high DPI
+            icon.setIsMask(False)
+            self.setWindowIcon(icon)
         
         # Set minimum size and make responsive
         self.setMinimumSize(900, 700)
