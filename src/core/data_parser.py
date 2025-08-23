@@ -159,10 +159,10 @@ def get_ta_unavailable_slots(ta_row: pd.Series, ta_data: pd.DataFrame) -> dict:
     unavailable_slots = {}
     
     # Use the same pattern as parse_responses for consistency
-    pattern = r' \[(\d+)(am|pm) to (\d+)(am|pm).*?\]'
+    pattern = r'\[(\d+)(am|pm) to (\d+)(am|pm).*?\]'
     
     for col in ta_data.columns:
-        match = re.match(pattern, col)
+        match = re.match(pattern, col.strip())
         if match:
             start_hour = convert_hour(match.group(1), match.group(2))
             end_hour = convert_hour(match.group(3), match.group(4))
