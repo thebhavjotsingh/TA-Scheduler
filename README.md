@@ -4,24 +4,34 @@ A modern desktop application for assigning Teaching Assistants (TAs) to lab sect
 
 ## Features
 
--  **Modern GUI**: Clean, dark-themed interface with drag-and-drop file support
--  **Smart Optimization**: Uses Google OR-Tools CP-SAT solver for efficient scheduling
--  **Comprehensive Reporting**: Detailed slot coverage and TA assignment summaries
--  **Configurable Constraints**: Adjustable daily hour limits and lab assignment limits
--  **CSV Integration**: Easy import/export of scheduling data
--  **Partial Coverage**: Supports optimal partial slot filling when full coverage isn't possible
+- **Modern GUI**: Clean, dark-themed interface with drag-and-drop file support
+- **Smart Optimization**: Uses Google OR-Tools CP-SAT solver for efficient scheduling
+- **Comprehensive Reporting**: Detailed slot coverage and TA assignment summaries
+- **Configurable Constraints**: Adjustable daily hour limits and lab assignment limits
+- **CSV Integration**: Easy import/export of scheduling data
+- **Partial Coverage**: Supports optimal partial slot filling when full coverage isn't possible
 
 ## Installation
 
+### Quick Start (Recommended)
+
 1. **Clone or download** this repository
-2. **Install dependencies**:
+2. **Install minimal dependencies**:
    ```bash
-   pip install -r requirements.txt
+   pip install -r requirements-minimal.txt
    ```
 3. **Run the application**:
    ```bash
    python main.py
    ```
+
+### Full Installation Options
+
+- **Minimal**: `pip install -r requirements-minimal.txt` (runtime only)
+- **Complete**: `pip install -r requirements.txt` (includes all dependencies)
+- **Development**: `pip install -r requirements.txt -r requirements-dev.txt` (for contributors)
+
+See [INSTALLATION.md](INSTALLATION.md) for detailed setup instructions and troubleshooting.
 
 ## Project Structure
 
@@ -29,7 +39,10 @@ A modern desktop application for assigning Teaching Assistants (TAs) to lab sect
 TA Scheduler/appfiles/
 ├── main.py                    # Main application entry point
 ├── README.md                  # Project documentation
-├── requirements.txt           # Python dependencies
+├── INSTALLATION.md            # Detailed installation guide
+├── requirements.txt           # Complete Python dependencies with versions
+├── requirements-minimal.txt   # Essential runtime dependencies only
+├── requirements-dev.txt       # Additional development dependencies
 ├── TA Scheduler.spec         # Updated PyInstaller spec (now uses main.py)
 ├── CSS_STYLING_GUIDE.md      # Comprehensive CSS styling documentation
 ├── src/                      # Source code package

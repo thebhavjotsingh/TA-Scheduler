@@ -1,0 +1,26 @@
+# TA Scheduler - Development Dependencies
+#
+# Additional packages for development, testing, and building.
+# Install with: pip install -r requirements.txt -r requirements-dev.txt
+
+# Code Quality & Linting
+black>=24.0.0          # Code formatting
+flake8>=7.0.0          # Code linting
+mypy>=1.8.0            # Static type checking
+
+# Testing Framework
+pytest>=8.0.0          # Unit testing framework
+pytest-qt>=4.3.0       # Qt application testing
+pytest-cov>=4.0.0      # Code coverage reporting
+
+# Documentation
+sphinx>=7.0.0          # Documentation generation
+sphinx-rtd-theme>=2.0.0  # Read the Docs theme
+
+# Build Tools
+build>=1.0.0           # Modern Python package building
+twine>=4.0.0           # Package uploading to PyPI
+
+# Development Utilities
+pre-commit>=3.6.0      # Git pre-commit hooks
+isort>=5.13.0          # Import sorting

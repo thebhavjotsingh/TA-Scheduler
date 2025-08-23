@@ -54,7 +54,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='icon.icns',  # Use .icns for macOS
+    icon='icon.ico',  # Use .icns for macOS
 )
 coll = COLLECT(
     exe,

@@ -1,3 +1,39 @@
-pandas>=2.0.0
-ortools>=9.0.0
-PySide6>=6.5.0
+# TA Scheduler - Python Dependencies
+# 
+# Core application requirements for the TA Scheduler desktop application.
+# This application uses Constraint Programming (CP-SAT) to optimize TA assignments
+# to lab sections with a modern PySide6 GUI and Excel export capabilities.
+#
+# Python Version: 3.12.6+ (tested with 3.12.6)
+# Installation: pip install -r requirements.txt
+
+# Data Processing & Analysis
+pandas>=2.3.1         # DataFrame operations, CSV processing
+numpy>=2.3.2          # Mathematical operations (pandas dependency)
+
+# Optimization Engine  
+ortools>=9.14.6206     # Google OR-Tools CP-SAT constraint programming solver
+
+# GUI Framework
+PySide6>=6.9.1         # Qt6-based modern desktop GUI framework
+PySide6-Addons>=6.9.1  # Additional PySide6 widgets and functionality
+PySide6-Essentials>=6.9.1  # Core PySide6 components
+
+# Excel File Generation
+openpyxl>=3.1.5        # Excel file creation, formatting, and VBA code generation
+
+# Date/Time Processing (pandas dependencies)
+python-dateutil>=2.9.0.post0  # Enhanced date parsing
+pytz>=2025.2          # Timezone handling
+tzdata>=2025.2         # Timezone database
+
+# Build & Packaging (Development)
+pyinstaller>=6.15.0   # Standalone executable creation
+pyinstaller-hooks-contrib>=2025.8  # Additional PyInstaller hooks
+
+# Type Checking & Compatibility  
+typing-extensions>=4.14.1  # Extended type hints for older Python versions
+
+# Additional Dependencies
+packaging>=25.0        # Version parsing and packaging utilities
+setuptools>=80.9.0     # Package installation tools

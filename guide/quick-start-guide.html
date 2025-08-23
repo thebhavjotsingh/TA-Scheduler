@@ -268,151 +268,202 @@
     <div class="container">
       <div class="header">
         <h1>TA Scheduler</h1>
-        <p>Advanced Scheduling System</p>
+        <p>Modern Constraint Programming-Based TA Assignment System</p>
         <span class="version-badge"
-          >Version 2.0 - Constraint Programming Version</span
+          >Version 3.0 - Enhanced with Excel Generation & Modular
+          Architecture</span
         >
       </div>
 
       <div class="content">
         <div class="card">
-          <h2><span class="card-icon">📋</span>Getting Started</h2>
+          <h2>Getting Started</h2>
           <ol class="step-list">
-            <li>Launch the <strong>TA Scheduler</strong> application</li>
             <li>
-              Prepare your three CSV input files (formats specified below)
+              <strong>Install Dependencies:</strong> Run
+              <code>pip install -r requirements-minimal.txt</code> for essential
+              packages only
             </li>
-            <li>Upload files using the drag-and-drop interface</li>
-            <li>Configure scheduling parameters</li>
-            <li>Execute the optimization algorithm</li>
-            <li>Review results and export data as needed</li>
+            <li>
+              <strong>Launch Application:</strong> Execute
+              <code>python main.py</code> from the project directory
+            </li>
+            <li>
+              <strong>Prepare CSV Files:</strong> Ensure your three required CSV
+              files match the formats specified below
+            </li>
+            <li>
+              <strong>Upload Files:</strong> Use the modern drag-and-drop
+              interface or browse buttons
+            </li>
+            <li>
+              <strong>Configure Constraints:</strong> Set daily hour limits and
+              max labs per TA (defaults: 8h/day, 2 labs max)
+            </li>
+            <li>
+              <strong>Run Optimization:</strong> Click "Run Scheduler" to
+              execute the CP-SAT constraint programming solver
+            </li>
+            <li>
+              <strong>Review Results:</strong> Analyze slot coverage, TA
+              assignments, and utilization statistics
+            </li>
+            <li>
+              <strong>Export Data:</strong> Export CSV summaries and generate
+              interactive Excel schedules with VBA automation
+            </li>
           </ol>
 
           <div class="success">
-            <strong>Note:</strong> The system automatically validates input
-            files and provides detailed feedback on any formatting issues.
+            <strong>New in v3.0:</strong> Interactive Excel schedule generation
+            with real-time Office Hours tracking and VBA automation support.
           </div>
         </div>
 
         <div class="card">
-          <h2><span class="card-icon">⚙️</span>System Configuration</h2>
+          <h2>System Configuration</h2>
           <p>
             Configure scheduling parameters to optimize resource allocation:
           </p>
-
           <table class="constraint-table">
             <tr>
               <th>Parameter</th>
+              <th>Default</th>
               <th>Description</th>
-              <th>Default Value</th>
             </tr>
             <tr>
-              <td><strong>Maximum Daily Hours</strong></td>
-              <td>Maximum hours a teaching assistant can work per day</td>
+              <td>Max Daily Hours</td>
               <td>4 hours</td>
+              <td>Maximum hours any TA can work per day</td>
             </tr>
             <tr>
-              <td><strong>Maximum Labs per TA</strong></td>
-              <td>
-                Maximum number of different laboratory sections assignable to
-                one TA
-              </td>
+              <td>Max Labs per TA</td>
               <td>3 labs</td>
+              <td>Maximum number of different lab sections per TA</td>
             </tr>
           </table>
 
           <div class="warning">
-            <strong>Important:</strong> Higher parameter values increase
-            scheduling flexibility but may result in uneven workload
-            distribution across teaching assistants.
+            <strong>Installation Options:</strong><br />
+            • <strong>Minimal:</strong> <code>requirements-minimal.txt</code> (4
+            core packages)<br />
+            • <strong>Complete:</strong> <code>requirements.txt</code> (all
+            dependencies with versions)<br />
+            • <strong>Development:</strong>
+            <code>requirements-dev.txt</code> (includes testing & code quality
+            tools)
           </div>
         </div>
 
         <div class="card full-width">
-          <h2><span class="card-icon">📄</span>Input File Specifications</h2>
+          <h2>Input File Specifications</h2>
           <p>
             The system requires three CSV files with the following exact
             formats:
           </p>
 
           <div class="csv-format">
-            <h4>1. Teaching Assistant Availability (Maximum Hours)</h4>
-            <code>TA Name, Hired For</code><br />
+            <h4>1. Max Availability CSV (max availability.csv)</h4>
+            <code>TA Name,Hired For</code><br />
+            <strong>Purpose:</strong> Defines TA names and maximum weekly
+            hours<br />
             <strong>Example:</strong><br />
-            <code>John Smith, 20</code><br />
-            <code>Jane Doe, 15</code><br />
-            <code>Mike Johnson, 25</code>
+            <code>Devipriya Raju,20</code><br />
+            <code>Moriom Chowdhury Kumu,15</code><br />
+            <code>Sai Vashnavi Jattu,25</code>
           </div>
 
           <div class="csv-format">
-            <h4>2. Availability Responses (Time Preferences)</h4>
-            <code>Name, [Unavailability columns...]</code><br />
+            <h4>2. Responses CSV (responses.csv)</h4>
+            <code
+              >Timestamp,Email Address,Name, [8am to 9am], [9am to 10am], [10am
+              to 11am], ...</code
+            ><br />
+            <strong>Purpose:</strong> TA availability responses with unavailable
+            time slots<br />
             <strong>Example:</strong><br />
             <code
-              >Name, Unavailable[Tuesday 8-11], Unavailable[Tuesday 11-14],
-              ...</code
+              >7/28/2025 15:48:18,email@ualberta.ca,John Smith,"Monday,
+              Tuesday","","Wednesday, Friday"</code
             ><br />
-            <code>John Smith, No, Yes, No, ...</code><br />
-            <code>Jane Doe, Yes, No, No, ...</code>
+            <strong>Note:</strong> Unavailable days are listed in each time slot
+            column (comma-separated)
           </div>
 
           <div class="csv-format">
-            <h4>3. Laboratory Requirements (Schedule Definition)</h4>
-            <code>Lab Section, Day, Start, End, Required</code><br />
+            <h4>3. Requirements CSV (requirements.csv)</h4>
+            <code>Lab Section,Day,Start,End,Required</code><br />
+            <strong>Purpose:</strong> Lab section definitions with staffing
+            requirements<br />
             <strong>Example:</strong><br />
-            <code>LAB 801, Tuesday, 14, 17, 4</code><br />
-            <code>LAB 802, Thursday, 14, 17, 3</code><br />
-            <code>LAB D01, Tuesday, 8, 11, 2</code>
+            <code>LAB 801,Tuesday,14,17,4</code><br />
+            <code>LAB 802,Thursday,14,17,3</code><br />
+            <code>LAB D01,Tuesday,8,11,2</code>
           </div>
 
           <div class="warning">
-            <strong>Critical:</strong> Column headers must match exactly as
-            specified. Time values must be in 24-hour format (e.g., 14 = 2:00
-            PM).
+            <strong>Critical Requirements:</strong><br />
+            • Column headers must match exactly as specified<br />
+            • Time values must be in 24-hour format (e.g., 14 = 2:00 PM)<br />
+            • Responses CSV: unavailable days listed as comma-separated
+            values<br />
+            • File names can be different but formats must be exact
           </div>
         </div>
 
         <div class="card full-width">
-          <h2><span class="card-icon">🎯</span>System Capabilities</h2>
+          <h2>System Capabilities</h2>
           <div class="features-grid">
             <div class="feature">
-              <h3>🧠 Advanced Algorithm</h3>
+              <h3>Advanced Algorithm</h3>
               <p>
-                Utilizes Google OR-Tools CP-SAT constraint programming for
-                optimal resource allocation
+                Google OR-Tools CP-SAT constraint programming with optimization
+                for complex scheduling scenarios
               </p>
             </div>
             <div class="feature">
-              <h3>📊 Real-time Analytics</h3>
-              <p>Live progress monitoring and comprehensive result analysis</p>
-            </div>
-            <div class="feature">
-              <h3>💾 Data Export</h3>
-              <p>Export optimized schedules in standard CSV format</p>
-            </div>
-            <div class="feature">
-              <h3>🎨 Professional Interface</h3>
+              <h3>Excel Generation</h3>
               <p>
-                Modern, responsive user interface with accessibility features
+                Interactive Excel schedules with VBA automation, Office Hours
+                tracking, and real-time updates
               </p>
             </div>
             <div class="feature">
-              <h3>📁 Intuitive Input</h3>
-              <p>Drag-and-drop file management with visual feedback</p>
+              <h3>Real-time Analytics</h3>
+              <p>
+                Live progress monitoring, comprehensive result analysis, and
+                detailed coverage statistics
+              </p>
             </div>
             <div class="feature">
-              <h3>⚠️ Data Validation</h3>
+              <h3>Advanced Export</h3>
               <p>
-                Comprehensive input validation with detailed error reporting
+                CSV summaries + interactive Excel files with individual TA
+                sheets and automated Office Hours
+              </p>
+            </div>
+            <div class="feature">
+              <h3>Modern Interface</h3>
+              <p>
+                Dark-themed responsive UI with drag-drop support and
+                accessibility features
+              </p>
+            </div>
+            <div class="feature">
+              <h3>Smart Validation</h3>
+              <p>
+                Comprehensive input validation with detailed error reporting and
+                troubleshooting guidance
               </p>
             </div>
           </div>
         </div>
 
         <div class="card">
-          <h2><span class="card-icon">📈</span>Result Interpretation</h2>
+          <h2>Result Interpretation & Export Options</h2>
           <p>
-            The optimization engine provides comprehensive analysis including:
+            The optimization engine provides comprehensive analysis and multiple
+            export formats:
           </p>
           <ul style="margin-left: 20px; margin-top: 10px">
             <li>
@@ -421,61 +472,81 @@
             </li>
             <li>
               <strong>⚠️ Partially Staffed:</strong> Some positions filled,
-              additional assignments required
+              additional assignments may be needed
             </li>
             <li>
               <strong>❌ Unstaffed:</strong> No suitable teaching assistants
               available for assignment
             </li>
             <li>
-              <strong>📊 Coverage Analytics:</strong> Statistical analysis of
-              overall scheduling effectiveness
+              <strong>📊 Coverage Analytics:</strong> Statistical analysis
+              showing percentage coverage and utilization rates
             </li>
             <li>
               <strong>👥 Workload Distribution:</strong> Analysis of assigned
-              hours versus contracted hours
-            </li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <h2><span class="card-icon">🔧</span>Technical Support</h2>
-          <p><strong>Common Issues and Solutions:</strong></p>
-          <ul style="margin-left: 20px; margin-top: 10px">
-            <li>
-              <strong>File Format Errors:</strong> Verify CSV column headers
-              match specifications exactly
-            </li>
-            <li>
-              <strong>No Available Staff:</strong> Review availability data for
-              scheduling conflicts
-            </li>
-            <li>
-              <strong>Complete Assignment Failure:</strong> Consider adjusting
-              constraint parameters
-            </li>
-            <li>
-              <strong>Missing Availability Data:</strong> Check the system log
-              for unreported availability submissions
+              hours versus contracted hours per TA
             </li>
           </ul>
 
           <div class="success">
-            <strong>Support:</strong> Detailed error messages are provided in
-            the results panel to assist with troubleshooting and resolution.
+            <strong>Export Options:</strong><br />
+            • <strong>CSV Export:</strong> Slot assignments and TA summaries in
+            spreadsheet format<br />
+            • <strong>Excel Generation:</strong> Interactive schedules with
+            individual TA sheets, Office Hours tracking, and VBA automation for
+            real-time updates
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Technical Support & Troubleshooting</h2>
+          <p><strong>Common Issues and Solutions:</strong></p>
+          <ul style="margin-left: 20px; margin-top: 10px">
+            <li>
+              <strong>Installation Issues:</strong> Use
+              <code>requirements-minimal.txt</code> for essential packages only,
+              or check <code>INSTALLATION.md</code> for detailed setup
+            </li>
+            <li>
+              <strong>File Format Errors:</strong> Verify CSV column headers
+              match specifications exactly (case-sensitive)
+            </li>
+            <li>
+              <strong>No Available Staff:</strong> Review availability data for
+              scheduling conflicts or missing responses
+            </li>
+            <li>
+              <strong>Constraint Issues:</strong> Consider adjusting daily hour
+              limits or max labs per TA parameters
+            </li>
+            <li>
+              <strong>Excel Generation Problems:</strong> Ensure openpyxl is
+              installed and output directory has write permissions
+            </li>
+            <li>
+              <strong>Missing TA Data:</strong> Check the system log for
+              unreported availability submissions
+            </li>
+          </ul>
+
+          <div class="success">
+            <strong>Support Resources:</strong><br />
+            • <strong>Installation Guide:</strong>
+            <code>INSTALLATION.md</code> - Comprehensive setup instructions<br />
+            • <strong>Error Logging:</strong> Detailed error messages displayed
+            in the results panel<br />
+            • <strong>Requirements:</strong> Multiple options available
+            (minimal, complete, development)
           </div>
         </div>
       </div>
 
       <div class="footer">
-        <h3>Ready to Begin?</h3>
-        <p>
-          Launch the TA Scheduler application to start optimizing your teaching
-          assistant assignments.
-        </p>
-        <p style="margin-top: 15px; color: #666; font-size: 0.9em">
-          Developed using PySide6, OR-Tools, and modern software engineering
-          principles
+        <p style="color: #666; font-size: 0.9em">
+          Developed with PySide6, Google OR-Tools CP-SAT, openpyxl, and modern
+          software engineering principles<br />
+          <strong>Version 3.0</strong> - Enhanced with Excel generation, VBA
+          automation, and modular architecture
         </p>
       </div>
     </div>

@@ -1,0 +1,12 @@
+# TA Scheduler - Minimal Runtime Dependencies
+#
+# This file contains only the essential packages needed to run the TA Scheduler.
+# Use this for production deployment or if you don't need development tools.
+#
+# Installation: pip install -r requirements-minimal.txt
+
+# Core Dependencies
+pandas>=2.3.1         # Data processing and CSV handling
+ortools>=9.14.6206     # Constraint programming optimization
+PySide6>=6.9.1         # GUI framework
+openpyxl>=3.1.5        # Excel file generation

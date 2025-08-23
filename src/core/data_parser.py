@@ -145,6 +145,40 @@ def parse_requirements(file_path: str):
     return slots
 
 
+def get_ta_unavailable_slots(ta_row: pd.Series, ta_data: pd.DataFrame) -> dict:
+    """
+    Extract unavailable time slots for a single TA in the format needed by schedule generator.
+    
+    Args:
+        ta_row: Single row from the responses DataFrame for one TA
+        ta_data: The full responses DataFrame (needed for column structure)
+        
+    Returns:
+        dict: {time_slot: [list_of_unavailable_days]}
+    """
+    unavailable_slots = {}
+    
+    # Use the same pattern as parse_responses for consistency
+    pattern = r' \[(\d+)(am|pm) to (\d+)(am|pm).*?\]'
+    
+    for col in ta_data.columns:
+        match = re.match(pattern, col)
+        if match:
+            start_hour = convert_hour(match.group(1), match.group(2))
+            end_hour = convert_hour(match.group(3), match.group(4))
+            time_slot = f"{start_hour}-{end_hour}"
+            
+            # Get the unavailable days for this time slot
+            value = ta_row[col]
+            if pd.notna(value) and str(value).strip():
+                # Split by comma and clean up the days
+                unavailable_days = [day.strip() for day in str(value).split(',') if day.strip()]
+                if unavailable_days:
+                    unavailable_slots[time_slot] = unavailable_days
+    
+    return unavailable_slots
+
+
 def is_available(ta_name: str, slot_day: str, slot_start_hour: int, slot_end_hour: int, ta_data: pd.DataFrame) -> bool:
     """
     Check if a TA is available for every hour in a given time range on a specific day.

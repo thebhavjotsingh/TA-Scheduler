@@ -15,6 +15,7 @@ from PySide6.QtCore import Qt, QTimer
 from .widgets import ModernFileDropZone, ModernCard
 from ..core.data_parser import parse_max_hours, parse_responses, parse_requirements
 from ..core.scheduler import solve_schedule
+from ..core.schedule_generator import generate_ta_schedule
 from ..config.constants import (
     DEFAULT_APP_NAME, ICON_PATH, MAX_DAILY_HOURS, MAX_LABS_PER_TA, 
     SLOT_OUTPUT_CSV, TA_OUTPUT_CSV
@@ -517,10 +518,16 @@ class App(QWidget):
                     slot_df.to_csv(os.path.join(dir_path, SLOT_OUTPUT_CSV), index=False)
                     ta_df.to_csv(os.path.join(dir_path, TA_OUTPUT_CSV), index=False)
                     self.log(f"\n💾 CSV files exported to: {dir_path}")
+                    
+                    # Offer Excel schedule generation
+                    self.show_excel_generation_dialog(dir_path, ta_df, responses_df)
                 else:
                     self.log("\n❌ Export canceled: no directory selected.")
             else:
                 self.log("\n⏭️ CSV export skipped.")
+                # Still offer Excel generation
+                ta_df = pd.DataFrame(ta_res).fillna('')
+                self.show_excel_generation_dialog(None, ta_df, responses_df)
 
         except Exception as e:
             # Enhanced error handling
@@ -571,3 +578,73 @@ class App(QWidget):
             # Log error in the UI as well
             self.log(f"❌ Error: {str(e)}")
             self.log("Please check your CSV files and try again.")
+
+    def show_excel_generation_dialog(self, default_dir, ta_df, responses_df):
+        """Show dialog for Excel schedule generation"""
+        msg_box = self.create_wide_message_box(
+            QMessageBox.Question,
+            f"Generate Excel Schedule – {DEFAULT_APP_NAME}",
+            "📊 Would you like to generate an interactive Excel schedule mapping?\n\n"
+            "This will create an Excel file with:\n"
+            "• Individual TA schedule sheets\n"
+            "• Office Hours tracking\n"
+            "• VBA code for real-time updates"
+        )
+        msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        reply = msg_box.exec()
+        
+        if reply == QMessageBox.Yes:
+            # Select directory for Excel export
+            if default_dir:
+                excel_dir = default_dir
+            else:
+                excel_dir = QFileDialog.getExistingDirectory(
+                    self, "Select directory for Excel schedule", os.getcwd(), QFileDialog.ShowDirsOnly
+                )
+            
+            if excel_dir:
+                try:
+                    self.log(f"\n📊 Generating Excel schedule mapping...")
+                    
+                    # Generate the Excel schedule using DataFrames directly (no temp files needed)
+                    excel_file, vba_module_file, vba_thisworkbook_file = generate_ta_schedule(
+                        ta_df, responses_df, excel_dir
+                    )
+                    
+                    self.log(f"✅ Excel file created: {os.path.basename(excel_file)}")
+                    self.log(f"📋 VBA code files created for manual installation:")
+                    self.log(f"   • {os.path.basename(vba_module_file)}")
+                    self.log(f"   • {os.path.basename(vba_thisworkbook_file)}")
+                    self.log(f"\n💡 To enable real-time Office Hours updates:")
+                    self.log(f"   1. Open the Excel file")
+                    self.log(f"   2. Press Alt+F11 to open VBA editor")
+                    self.log(f"   3. Insert > Module, paste code from vba_module_code.txt")
+                    self.log(f"   4. Double-click 'ThisWorkbook', paste code from vba_thisworkbook_code.txt")
+                    self.log(f"   5. Save as .xlsm (Excel Macro-Enabled Workbook)")
+                    
+                    # Show completion message
+                    completion_msg = self.create_wide_message_box(
+                        QMessageBox.Information,
+                        "Excel Schedule Generated",
+                        f"Excel schedule mapping successfully created!\n\n"
+                        f"Location: {excel_dir}\n"
+                        f"File: {os.path.basename(excel_file)}\n\n"
+                        f"VBA files for dynamic updates are also included."
+                        f"⚠️ Refer Instructions in the log for enabling VBA macros"
+                    )
+                    completion_msg.setStandardButtons(QMessageBox.Ok)
+                    completion_msg.exec()
+                    
+                except Exception as e:
+                    self.log(f"\n❌ Error generating Excel schedule: {str(e)}")
+                    error_msg = self.create_wide_message_box(
+                        QMessageBox.Critical,
+                        "Excel Generation Error",
+                        f"Failed to generate Excel schedule:\n\n{str(e)}"
+                    )
+                    error_msg.setStandardButtons(QMessageBox.Ok)
+                    error_msg.exec()
+            else:
+                self.log("\n❌ Excel generation canceled: no directory selected.")
+        else:
+            self.log("\n⏭️ Excel schedule generation skipped.")
