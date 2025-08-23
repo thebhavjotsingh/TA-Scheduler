@@ -1,295 +1,388 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TA Scheduler - User Guide</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        body {
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: #f5f5f5;
-            padding: 20px;
-        }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: #f5f5f5;
+        padding: 20px;
+      }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
 
-        .header {
-            background: #2c3e50;
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
+      .header {
+        background: #2c3e50;
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
 
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
+      .header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+      }
 
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
+      .header p {
+        font-size: 1.1em;
+        opacity: 0.9;
+      }
 
-        .content {
-            padding: 40px;
-        }
+      .content {
+        padding: 40px;
+      }
 
-        .section {
-            margin-bottom: 40px;
-        }
+      .section {
+        margin-bottom: 40px;
+      }
 
-        .section h2 {
-            color: #2c3e50;
-            font-size: 1.4em;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #ecf0f1;
-            padding-bottom: 5px;
-        }
+      .section h2 {
+        color: #2c3e50;
+        font-size: 1.4em;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #ecf0f1;
+        padding-bottom: 5px;
+      }
 
-        .step-list {
-            list-style: none;
-            counter-reset: step-counter;
-        }
+      .step-list {
+        list-style: none;
+        counter-reset: step-counter;
+      }
 
-        .step-list li {
-            counter-increment: step-counter;
-            margin-bottom: 12px;
-            padding-left: 35px;
-            position: relative;
-        }
+      .step-list li {
+        counter-increment: step-counter;
+        margin-bottom: 12px;
+        padding-left: 35px;
+        position: relative;
+      }
 
-        .step-list li::before {
-            content: counter(step-counter);
-            position: absolute;
-            left: 0;
-            top: 0;
-            background: #2c3e50;
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 0.85em;
-        }
+      .step-list li::before {
+        content: counter(step-counter);
+        position: absolute;
+        left: 0;
+        top: 0;
+        background: #2c3e50;
+        color: white;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.85em;
+      }
 
-        .file-format {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            padding: 15px;
-            margin: 10px 0;
-            font-family: "Courier New", monospace;
-            font-size: 0.9em;
-        }
+      .file-format {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 15px;
+        margin: 10px 0;
+        font-family: "Courier New", monospace;
+        font-size: 0.9em;
+      }
 
-        .file-format h4 {
-            margin-bottom: 8px;
-            color: #2c3e50;
-            font-family: "Segoe UI", sans-serif;
-        }
+      .file-format h4 {
+        margin-bottom: 8px;
+        color: #2c3e50;
+        font-family: "Segoe UI", sans-serif;
+      }
 
-        .note {
-            background: #e8f4f8;
-            border: 1px solid #bee5eb;
-            border-radius: 5px;
-            padding: 12px;
-            margin: 15px 0;
-            color: #0c5460;
-        }
+      .note {
+        background: #e8f4f8;
+        border: 1px solid #bee5eb;
+        border-radius: 5px;
+        padding: 12px;
+        margin: 15px 0;
+        color: #0c5460;
+      }
 
-        .warning {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 5px;
-            padding: 12px;
-            margin: 15px 0;
-            color: #856404;
-        }
+      .warning {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 5px;
+        padding: 12px;
+        margin: 15px 0;
+        color: #856404;
+      }
 
-        ul {
-            margin-left: 20px;
-        }
+      ul {
+        margin-left: 20px;
+      }
 
-        ul li {
-            margin-bottom: 5px;
-        }
+      ul li {
+        margin-bottom: 5px;
+      }
 
-        code {
-            background: #f1f3f4;
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-family: "Courier New", monospace;
-            color: #2c3e50;
-        }
+      code {
+        background: #f1f3f4;
+        padding: 2px 5px;
+        border-radius: 3px;
+        font-family: "Courier New", monospace;
+        color: #2c3e50;
+      }
 
-        .footer {
-            background: #34495e;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            font-size: 0.9em;
-        }
+      .footer {
+        background: #34495e;
+        color: white;
+        text-align: center;
+        padding: 20px;
+        font-size: 0.9em;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <div class="header">
-            <h1>TA Scheduler</h1>
-            <p>User Guide</p>
+      <div class="header">
+        <h1>TA Scheduler</h1>
+        <p>User Guide</p>
+      </div>
+
+      <div class="content">
+        <div class="section">
+          <h2>Getting Started</h2>
+
+          <h3>Windows Users:</h3>
+          <ol class="step-list">
+            <li>Download and run "TA Scheduler.exe"</li>
+            <li>Prepare your three CSV files (see formats below)</li>
+            <li>
+              Drag and drop files into the application or use Browse buttons
+            </li>
+            <li>Adjust settings if needed (defaults usually work fine)</li>
+            <li>Click "Run Scheduler"</li>
+            <li>Review results and export if satisfied</li>
+          </ol>
+
+          <h3>Mac Users:</h3>
+          <ol class="step-list">
+            <li>Download the DMG file</li>
+            <li>Double-click to mount the DMG file</li>
+            <li>
+              If you get "DMG file is damaged" error: Go to System Preferences >
+              Security & Privacy > General, and click "Open Anyway"
+            </li>
+            <li>Drag "TA Scheduler" to your Applications folder</li>
+            <li>
+              In Applications, locate "TA Scheduler" but DON'T double-click it
+              yet
+            </li>
+            <li>
+              Right-click the app and select "Open" (this is important for first
+              launch)
+            </li>
+            <li>Click "Open" when prompted about unidentified developer</li>
+            <li>
+              If blocked: Go to System Preferences > Security & Privacy >
+              General, and click "Open Anyway"
+            </li>
+            <li>Prepare your three CSV files (see formats below)</li>
+            <li>
+              Drag and drop files into the application or use Browse buttons
+            </li>
+            <li>Adjust settings if needed (defaults usually work fine)</li>
+            <li>Click "Run Scheduler"</li>
+            <li>Review results and export if satisfied</li>
+          </ol>
+
+          <div class="note">
+            <strong>Mac Security Note:</strong> Since this app isn't signed with
+            an Apple Developer certificate, macOS will block it initially. The
+            right-click > Open method and System Preferences adjustments are
+            required to bypass Gatekeeper security safely.
+          </div>
         </div>
 
-        <div class="content">
-            <div class="section">
-                <h2>Getting Started</h2>
-                
-                <h3>Windows Users:</h3>
-                <ol class="step-list">
-                    <li>Download and run "TA Scheduler.exe"</li>
-                    <li>Prepare your three CSV files (see formats below)</li>
-                    <li>Drag and drop files into the application or use Browse buttons</li>
-                    <li>Adjust settings if needed (defaults usually work fine)</li>
-                    <li>Click "Run Scheduler"</li>
-                    <li>Review results and export if satisfied</li>
-                </ol>
+        <div class="section">
+          <h2>Required Files</h2>
 
-                <h3>Mac Users:</h3>
-                <ol class="step-list">
-                    <li>Download the DMG file</li>
-                    <li>Double-click to mount the DMG file</li>
-                    <li>If you get "DMG file is damaged" error: Go to System Preferences > Security & Privacy > General, and click "Open Anyway"</li>
-                    <li>Drag "TA Scheduler" to your Applications folder</li>
-                    <li>In Applications, locate "TA Scheduler" but DON'T double-click it yet</li>
-                    <li>Right-click the app and select "Open" (this is important for first launch)</li>
-                    <li>Click "Open" when prompted about unidentified developer</li>
-                    <li>If blocked: Go to System Preferences > Security & Privacy > General, and click "Open Anyway"</li>
-                    <li>Prepare your three CSV files (see formats below)</li>
-                    <li>Drag and drop files into the application or use Browse buttons</li>
-                    <li>Adjust settings if needed (defaults usually work fine)</li>
-                    <li>Click "Run Scheduler"</li>
-                    <li>Review results and export if satisfied</li>
-                </ol>
+          <div class="file-format">
+            <h4>1. Max Availability CSV</h4>
+            <strong>Columns:</strong> TA Name, Hired For<br />
+            <strong>Example:</strong><br />
+            John Smith, 20<br />
+            Jane Doe, 15
+          </div>
 
-                <div class="note">
-                    <strong>Mac Security Note:</strong> Since this app isn't signed with an Apple Developer certificate, macOS will block it initially. The right-click > Open method and System Preferences adjustments are required to bypass Gatekeeper security safely.
-                </div>
-            </div>
+          <div class="file-format">
+            <h4>2. Responses CSV</h4>
+            <strong>Columns:</strong> Timestamp, Email Address, Name, [8am to
+            9am], [9am to 10am], ...<br />
+            <strong>Example:</strong><br />
+            7/28/2025 15:48:18, john@email.com, John Smith, "Monday, Tuesday",
+            "", "Friday"<br />
+            <em>Note: List unavailable days in each time slot column</em>
+          </div>
 
-            <div class="section">
-                <h2>Required Files</h2>
-                
-                <div class="file-format">
-                    <h4>1. Max Availability CSV</h4>
-                    <strong>Columns:</strong> TA Name, Hired For<br>
-                    <strong>Example:</strong><br>
-                    John Smith, 20<br>
-                    Jane Doe, 15
-                </div>
+          <div class="file-format">
+            <h4>3. Requirements CSV</h4>
+            <strong>Columns:</strong> Lab Section, Day, Start, End, Required<br />
+            <strong>Example:</strong><br />
+            LAB 801, Tuesday, 14, 17, 4<br />
+            LAB 802, Thursday, 14, 17, 3
+          </div>
 
-                <div class="file-format">
-                    <h4>2. Responses CSV</h4>
-                    <strong>Columns:</strong> Timestamp, Email Address, Name, [8am to 9am], [9am to 10am], ...<br>
-                    <strong>Example:</strong><br>
-                    7/28/2025 15:48:18, john@email.com, John Smith, "Monday, Tuesday", "", "Friday"<br>
-                    <em>Note: List unavailable days in each time slot column</em>
-                </div>
-
-                <div class="file-format">
-                    <h4>3. Requirements CSV</h4>
-                    <strong>Columns:</strong> Lab Section, Day, Start, End, Required<br>
-                    <strong>Example:</strong><br>
-                    LAB 801, Tuesday, 14, 17, 4<br>
-                    LAB 802, Thursday, 14, 17, 3
-                </div>
-
-                <div class="warning">
-                    <strong>Important:</strong> Column headers must match exactly. Use 24-hour time format (14 = 2 PM).
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>Settings</h2>
-                <ul>
-                    <li><strong>Max Daily Hours:</strong> Maximum hours any TA can work per day (default: 8)</li>
-                    <li><strong>Max Labs per TA:</strong> Maximum different lab sections per TA (default: 2)</li>
-                </ul>
-                <div class="note">
-                    The default settings work well for most situations. Only change if you have specific requirements.
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>Understanding Results</h2>
-                <ul>
-                    <li><strong>Fully Covered:</strong> All required TAs assigned</li>
-                    <li><strong>Partially Filled:</strong> Some TAs assigned, more needed</li>
-                    <li><strong>Unfilled:</strong> No TAs available for this slot</li>
-                </ul>
-                
-                <h2>Export Options</h2>
-                <ul>
-                    <li><strong>CSV Export:</strong> Creates summary files for further analysis</li>
-                    <li><strong>Excel Generation:</strong> Creates interactive schedules with individual TA sheets</li>
-                </ul>
-            </div>
-
-            <div class="section">
-                <h2>Excel Setup (Optional)</h2>
-                <p>If you choose Excel generation, follow these steps to enable automatic updates:</p>
-                <ol class="step-list">
-                    <li>Open the generated Excel file</li>
-                    <li>Press Alt+F11 to open VBA editor</li>
-                    <li>Insert > Module, then paste code from "vba_module_code.txt"</li>
-                    <li>Double-click "ThisWorkbook", paste code from "vba_thisworkbook_code.txt"</li>
-                    <li>Save as Excel Macro-Enabled Workbook (.xlsm)</li>
-                </ol>
-                <div class="note">
-                    Skip this section if you only need basic Excel files without automatic features.
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>Common Issues</h2>
-                <ul>
-                    <li><strong>Mac - "DMG file is damaged/can't be opened":</strong> Go to System Preferences > Security & Privacy > General, click "Open Anyway"</li>
-                    <li><strong>Mac - "Cannot open because it is from an unidentified developer":</strong> Right-click the app, select "Open", then click "Open" in the dialog</li>
-                    <li><strong>Mac - App blocked after right-click method:</strong> Go to System Preferences > Security & Privacy > General, click "Open Anyway" button next to the blocked app message</li>
-                    <li><strong>Mac - "App will damage your computer":</strong> This indicates potential quarantine attribute. Try: <code>xattr -dr com.apple.quarantine /Applications/TA\ Scheduler.app</code> in Terminal</li>
-                    <li><strong>Mac - Multiple security prompts:</strong> You may need to repeat the right-click > Open process several times for nested components</li>
-                    <li><strong>File upload errors:</strong> Check column headers match exactly</li>
-                    <li><strong>No assignments:</strong> Verify TA availability doesn't conflict with lab times</li>
-                    <li><strong>Poor coverage:</strong> Consider adjusting max daily hours or max labs settings</li>
-                    <li><strong>Missing TAs:</strong> Check that all TAs have submitted availability responses</li>
-                    <li><strong>Slow performance:</strong> Large datasets (100+ TAs) may take several minutes to process</li>
-                </ul>
-
-                <div class="warning">
-                    <strong>Mac Users Alternative Method:</strong> If all else fails, you can temporarily disable Gatekeeper system-wide by running <code>sudo spctl --master-disable</code> in Terminal, then re-enable it with <code>sudo spctl --master-enable</code> after installation. Use this only as a last resort.
-                </div>
-            </div>
+          <div class="warning">
+            <strong>Important:</strong> Column headers must match exactly. Use
+            24-hour time format (14 = 2 PM).
+          </div>
         </div>
 
-        <div class="footer">
-            <p>Standalone application - no additional software installation required<br>
-            Available for Windows (.exe) and macOS (.dmg)</p>
+        <div class="section">
+          <h2>Settings</h2>
+          <ul>
+            <li>
+              <strong>Max Daily Hours:</strong> Maximum hours any TA can work
+              per day (default: 8)
+            </li>
+            <li>
+              <strong>Max Labs per TA:</strong> Maximum different lab sections
+              per TA (default: 2)
+            </li>
+          </ul>
+          <div class="note">
+            The default settings work well for most situations. Only change if
+            you have specific requirements.
+          </div>
         </div>
+
+        <div class="section">
+          <h2>Understanding Results</h2>
+          <ul>
+            <li><strong>Fully Covered:</strong> All required TAs assigned</li>
+            <li>
+              <strong>Partially Filled:</strong> Some TAs assigned, more needed
+            </li>
+            <li><strong>Unfilled:</strong> No TAs available for this slot</li>
+          </ul>
+
+          <h2>Export Options</h2>
+          <ul>
+            <li>
+              <strong>CSV Export:</strong> Creates summary files for further
+              analysis
+            </li>
+            <li>
+              <strong>Excel Generation:</strong> Creates interactive schedules
+              with individual TA sheets
+            </li>
+          </ul>
+        </div>
+
+        <div class="section">
+          <h2>Excel Setup (Optional)</h2>
+          <p>
+            If you choose Excel generation, follow these steps to enable
+            automatic updates:
+          </p>
+          <ol class="step-list">
+            <li>Open the generated Excel file</li>
+            <li>Press Alt+F11 to open VBA editor</li>
+            <li>Insert > Module, then paste code from "vba_module_code.txt"</li>
+            <li>
+              Double-click "ThisWorkbook", paste code from
+              "vba_thisworkbook_code.txt"
+            </li>
+            <li>Save as Excel Macro-Enabled Workbook (.xlsm)</li>
+          </ol>
+          <div class="note">
+            Skip this section if you only need basic Excel files without
+            automatic features.
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>Common Issues</h2>
+          <ul>
+            <li>
+              <strong>Mac - "DMG file is damaged/can't be opened":</strong> Go
+              to System Preferences > Security & Privacy > General, click "Open
+              Anyway"
+            </li>
+            <li>
+              <strong
+                >Mac - "Cannot open because it is from an unidentified
+                developer":</strong
+              >
+              Right-click the app, select "Open", then click "Open" in the
+              dialog
+            </li>
+            <li>
+              <strong>Mac - App blocked after right-click method:</strong> Go to
+              System Preferences > Security & Privacy > General, click "Open
+              Anyway" button next to the blocked app message
+            </li>
+            <li>
+              <strong>Mac - "App will damage your computer":</strong> This
+              indicates potential quarantine attribute. Try:
+              <code
+                >xattr -dr com.apple.quarantine /Applications/TA\
+                Scheduler.app</code
+              >
+              in Terminal
+            </li>
+            <li>
+              <strong>Mac - Multiple security prompts:</strong> You may need to
+              repeat the right-click > Open process several times for nested
+              components
+            </li>
+            <li>
+              <strong>File upload errors:</strong> Check column headers match
+              exactly
+            </li>
+            <li>
+              <strong>No assignments:</strong> Verify TA availability doesn't
+              conflict with lab times
+            </li>
+            <li>
+              <strong>Poor coverage:</strong> Consider adjusting max daily hours
+              or max labs settings
+            </li>
+            <li>
+              <strong>Missing TAs:</strong> Check that all TAs have submitted
+              availability responses
+            </li>
+            <li>
+              <strong>Slow performance:</strong> Large datasets (100+ TAs) may
+              take several minutes to process
+            </li>
+          </ul>
+
+          <div class="warning">
+            <strong>Mac Users Alternative Method:</strong> If all else fails,
+            you can temporarily disable Gatekeeper system-wide by running
+            <code>sudo spctl --master-disable</code> in Terminal, then re-enable
+            it with <code>sudo spctl --master-enable</code> after installation.
+            Use this only as a last resort.
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>
+          Standalone application - no additional software installation
+          required<br />
+          Available for Windows (.exe) and macOS (.dmg)
+        </p>
+      </div>
     </div>
-</body>
+  </body>
 </html>
