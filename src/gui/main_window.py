@@ -617,7 +617,7 @@ class App(QWidget):
                     self.log(f"   • {os.path.basename(vba_thisworkbook_file)}")
                     self.log(f"\n💡 To enable real-time Office Hours updates:")
                     self.log(f"   1. Open the Excel file")
-                    self.log(f"   2. Press Alt+F11 to open VBA editor")
+                    self.log(f"   2. Press Alt/Option+F11 to open VBA editor")
                     self.log(f"   3. Insert > Module, paste code from vba_module_code.txt")
                     self.log(f"   4. Double-click 'ThisWorkbook', paste code from vba_thisworkbook_code.txt")
                     self.log(f"   5. Save as .xlsm (Excel Macro-Enabled Workbook)")
