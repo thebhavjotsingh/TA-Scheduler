@@ -6,7 +6,7 @@ from ortools.sat.python import cp_model
 
 from .data_parser import is_available
 from ..utils.time_utils import slots_overlap, get_slots_by_day
-from ..config.constants import MAX_DAILY_HOURS, MAX_LABS_PER_TA
+from ..config.constants import MAX_DAILY_HOURS, MAX_LABS_PER_TA, MIN_LABS_PER_TA
 
 
 class CPSolutionPrinter(cp_model.CpSolverSolutionCallback):
@@ -26,9 +26,51 @@ class CPSolutionPrinter(cp_model.CpSolverSolutionCallback):
         return self.__solution_count
 
 
+class MultipleSolutionsCollector(cp_model.CpSolverSolutionCallback):
+    """Solution callback to collect multiple solutions."""
+    
+    def __init__(self, x_vars, slots, sched, max_solutions=5):
+        cp_model.CpSolverSolutionCallback.__init__(self)
+        self.__x_vars = x_vars
+        self.__slots = slots
+        self.__sched = sched
+        self.__solutions = []
+        self.__max_solutions = max_solutions
+        
+    def on_solution_callback(self):
+        """Called each time a solution is found."""
+        if len(self.__solutions) < self.__max_solutions:
+            # Store the current solution
+            solution = {}
+            for ta_idx in range(len(self.__sched)):
+                for slot in self.__slots:
+                    if self.Value(self.__x_vars[ta_idx][slot['id']]):
+                        solution[(ta_idx, slot['id'])] = 1
+                    else:
+                        solution[(ta_idx, slot['id'])] = 0
+            
+            # Calculate objective value for this solution
+            total_hours = sum((slot['end'] - slot['start']) 
+                            for ta_idx in range(len(self.__sched)) 
+                            for slot in self.__slots 
+                            if solution.get((ta_idx, slot['id']), 0))
+            
+            self.__solutions.append({
+                'assignments': solution,
+                'objective_value': total_hours,
+                'solution_number': len(self.__solutions) + 1
+            })
+    
+    def get_solutions(self):
+        return self.__solutions
+    
+    def solution_count(self):
+        return len(self.__solutions)
+
+
 def solve_schedule(employees: list, responses_df: pd.DataFrame, max_hours: dict, slots: list, 
                   max_daily_hours: int = MAX_DAILY_HOURS, max_labs_per_ta: int = MAX_LABS_PER_TA,
-                  log_func=None):
+                  min_labs_per_ta: int = MIN_LABS_PER_TA, log_func=None):
     """
     Build and solve a CP-SAT model to assign TAs to lab slots.
 
@@ -39,7 +81,7 @@ def solve_schedule(employees: list, responses_df: pd.DataFrame, max_hours: dict,
     Additional constraints:
     - No TA can be assigned to overlapping time slots
     - No TA can work more than max_daily_hours hours per day
-    - No TA can be assigned to more than max_labs_per_ta different labs
+    - Each TA can be assigned to between min_labs_per_ta and max_labs_per_ta different labs
 
     Args:
         employees (list): List of TA names.
@@ -48,6 +90,7 @@ def solve_schedule(employees: list, responses_df: pd.DataFrame, max_hours: dict,
         slots (list): List of slot requirement dicts.
         max_daily_hours (int): Maximum hours per day for any TA.
         max_labs_per_ta (int): Maximum number of labs per TA.
+        min_labs_per_ta (int): Minimum number of labs per TA.
         log_func (callable): Optional logging function for debug output.
 
     Returns:
@@ -75,7 +118,7 @@ def solve_schedule(employees: list, responses_df: pd.DataFrame, max_hours: dict,
     log(f"Total required positions: {sum(slot['required'] for slot in slots)}")
     log(f"Total available TA hours: {sum(max_hours.get(ta, 0) for ta in sched)}")
     log(f"Max daily hours limit: {max_daily_hours}")
-    log(f"Max labs per TA limit: {max_labs_per_ta}")
+    log(f"Labs per TA range: {min_labs_per_ta}-{max_labs_per_ta}")
     log("")
 
     # Create the CP model
@@ -150,6 +193,7 @@ def solve_schedule(employees: list, responses_df: pd.DataFrame, max_hours: dict,
     log(f"Added {daily_constraints} daily hour limit constraints")
 
     # Lab limit constraint: TA cannot be assigned to more than max_labs_per_ta different labs
+    # and must be assigned to at least min_labs_per_ta different labs
     lab_constraints = 0
     for ta_idx in range(len(sched)):
         # For each unique lab, create a binary variable indicating if TA works in that lab
@@ -163,11 +207,20 @@ def solve_schedule(employees: list, responses_df: pd.DataFrame, max_hours: dict,
             for slot in lab_slots:
                 model.Add(x[ta_idx][slot['id']] <= lab_indicators[lab])
         
-        # Total labs assigned to this TA cannot exceed the limit
-        model.Add(sum(lab_indicators.values()) <= max_labs_per_ta)
+        # Total labs assigned to this TA must be within the min-max range
+        total_labs = sum(lab_indicators.values())
+        model.Add(total_labs <= max_labs_per_ta)
+        
+        # Only add minimum constraint if min_labs_per_ta > 0 and there are enough labs available
+        if min_labs_per_ta > 0 and len(unique_labs) >= min_labs_per_ta:
+            # Check if TA has any hours available before enforcing minimum
+            ta_max_hours = max_hours.get(sched[ta_idx], 0)
+            if ta_max_hours > 0:
+                model.Add(total_labs >= min_labs_per_ta)
+        
         lab_constraints += 1
 
-    log(f"Added {lab_constraints} lab limit constraints (max {max_labs_per_ta} labs per TA)")
+    log(f"Added {lab_constraints} lab limit constraints ({min_labs_per_ta}-{max_labs_per_ta} labs per TA)")
     log(f"Total constraints: {len(slots) + hour_constraints + overlap_constraints + daily_constraints + lab_constraints}")
     log("")
 
@@ -290,3 +343,217 @@ def solve_schedule(employees: list, responses_df: pd.DataFrame, max_hours: dict,
             })
 
     return slot_results, ta_results
+
+
+def find_multiple_solutions(employees: list, responses_df: pd.DataFrame, max_hours: dict, slots: list, 
+                           max_daily_hours: int = MAX_DAILY_HOURS, max_labs_per_ta: int = MAX_LABS_PER_TA,
+                           min_labs_per_ta: int = MIN_LABS_PER_TA, max_solutions: int = 5, log_func=None):
+    """
+    Find multiple solutions to the TA scheduling problem.
+    
+    Args:
+        employees (list): List of TA names.
+        responses_df (pd.DataFrame): Raw TA availability responses DataFrame.
+        max_hours (dict): Mapping TA to maximum hours they can work.
+        slots (list): List of slot requirement dicts.
+        max_daily_hours (int): Maximum hours per day for any TA.
+        max_labs_per_ta (int): Maximum number of labs per TA.
+        min_labs_per_ta (int): Minimum number of labs per TA.
+        max_solutions (int): Maximum number of alternative solutions to find.
+        log_func (callable): Optional logging function for debug output.
+        
+    Returns:
+        list: List of solution dictionaries with slot_results, ta_results, and metadata.
+    """
+    # Filter employees who have responses in the DataFrame
+    sched = [e for e in employees if e in responses_df['Name'].values]
+    
+    # Helper function for logging
+    def log(message: str):
+        if log_func:
+            log_func(message)
+        else:
+            print(message)
+    
+    log("🔍 Finding multiple solutions...")
+    log(f"Looking for up to {max_solutions} alternative solutions...")
+    log("")
+    
+    # Create the CP model (same as solve_schedule but with multiple solutions collector)
+    model = cp_model.CpModel()
+    
+    # Decision variables: x[ta_idx][slot_id] = 1 if TA is assigned to slot
+    x = {}
+    for ta_idx, ta_name in enumerate(sched):
+        x[ta_idx] = {}
+        for slot in slots:
+            var_name = f'x_{ta_idx}_{slot["id"]}'
+            x[ta_idx][slot['id']] = model.NewBoolVar(var_name)
+            
+            # Force to 0 if TA is not available for this slot
+            if not is_available(ta_name, slot['day'], int(slot['start']), int(slot['end']), responses_df):
+                model.Add(x[ta_idx][slot['id']] == 0)
+    
+    # Shortage variables for each slot
+    shortage = {}
+    for slot in slots:
+        shortage[slot['id']] = model.NewIntVar(0, slot['required'], f'shortage_{slot["id"]}')
+        assigned_to_slot = sum(x[ta_idx][slot['id']] for ta_idx in range(len(sched)))
+        model.Add(assigned_to_slot + shortage[slot['id']] == slot['required'])
+    
+    # Hour limit constraints
+    for ta_idx, ta_name in enumerate(sched):
+        total_hours = sum(int(slot['end'] - slot['start']) * x[ta_idx][slot['id']] 
+                         for slot in slots)
+        model.Add(total_hours <= max_hours.get(ta_name, 0))
+    
+    # No overlapping slots constraint
+    for ta_idx in range(len(sched)):
+        for i, slot1 in enumerate(slots):
+            for j, slot2 in enumerate(slots):
+                if i < j and slots_overlap(slot1, slot2):
+                    model.Add(x[ta_idx][slot1['id']] + x[ta_idx][slot2['id']] <= 1)
+    
+    # Daily hour limits
+    for ta_idx in range(len(sched)):
+        slots_by_day = get_slots_by_day(slots)
+        for day, day_slots in slots_by_day.items():
+            daily_hours = sum(int(slot['end'] - slot['start']) * x[ta_idx][slot['id']] 
+                            for slot in day_slots)
+            model.Add(daily_hours <= max_daily_hours)
+    
+    # Lab limit constraints
+    for ta_idx in range(len(sched)):
+        unique_labs = list(set(slot['section'] for slot in slots))
+        lab_indicators = {}
+        
+        for lab in unique_labs:
+            lab_indicators[lab] = model.NewBoolVar(f'lab_indicator_{ta_idx}_{lab}')
+            lab_slots = [slot for slot in slots if slot['section'] == lab]
+            for slot in lab_slots:
+                model.Add(x[ta_idx][slot['id']] <= lab_indicators[lab])
+        
+        total_labs = sum(lab_indicators.values())
+        model.Add(total_labs <= max_labs_per_ta)
+        
+        if min_labs_per_ta > 0 and len(unique_labs) >= min_labs_per_ta:
+            ta_max_hours = max_hours.get(sched[ta_idx], 0)
+            if ta_max_hours > 0:
+                model.Add(total_labs >= min_labs_per_ta)
+    
+    # Objective: maximize total assigned hours
+    total_assigned_hours = sum((slot['end'] - slot['start']) * x[ta_idx][slot['id']]
+                              for ta_idx in range(len(sched)) for slot in slots)
+    total_shortage = sum(shortage[slot['id']] for slot in slots)
+    coverage_bonus = sum(x[ta_idx][slot['id']] for ta_idx in range(len(sched)) for slot in slots)
+    
+    shortage_penalty = 1000
+    coverage_bonus_weight = 10
+    model.Maximize(total_assigned_hours - shortage_penalty * total_shortage + coverage_bonus_weight * coverage_bonus)
+    
+    # Solve with multiple solutions collector
+    solver = cp_model.CpSolver()
+    solver.parameters.max_time_in_seconds = 120.0  # More time for multiple solutions
+    solver.parameters.enumerate_all_solutions = True
+    
+    # Use multiple solutions collector
+    solution_collector = MultipleSolutionsCollector(x, slots, sched, max_solutions)
+    
+    status = solver.Solve(model, solution_collector)
+    
+    solutions_found = solution_collector.get_solutions()
+    
+    if not solutions_found:
+        log("❌ No solutions found!")
+        return []
+    
+    log(f"✅ Found {len(solutions_found)} alternative solution(s)")
+    log("")
+    
+    # Process each solution to create slot_results and ta_results
+    processed_solutions = []
+    
+    for i, solution_data in enumerate(solutions_found):
+        log(f"📋 Processing Solution {i + 1}/{len(solutions_found)}...")
+        
+        # Process this solution similar to solve_schedule
+        slot_results = []
+        for slot in slots:
+            assigned_tas = []
+            for ta_idx, ta_name in enumerate(sched):
+                if solution_data['assignments'].get((ta_idx, slot['id']), 0):
+                    assigned_tas.append(ta_name)
+            
+            slot_results.append({
+                'Lab Section': slot.get('section', f"Slot {slot['id']}"),
+                'Day': slot['day'],
+                'Start Time': f"{slot['start']}:00",
+                'End Time': f"{slot['end']}:00",
+                'Required Count': slot['required'],
+                'Assigned Count': len(assigned_tas),
+                'TAs Assigned': ', '.join(assigned_tas) if assigned_tas else '',
+                'Needed': max(0, slot['required'] - len(assigned_tas))
+            })
+        
+        # Process TA results
+        ta_results = []
+        for ta_idx, ta_name in enumerate(sched):
+            assigned_slots = []
+            daily_breakdown = {}
+            labs_assigned = set()
+            
+            for slot in slots:
+                if solution_data['assignments'].get((ta_idx, slot['id']), 0):
+                    assigned_slots.append(slot)
+                    day = slot['day']
+                    hours = slot['end'] - slot['start']
+                    daily_breakdown[day] = daily_breakdown.get(day, 0) + hours
+                    if 'section' in slot:
+                        labs_assigned.add(slot['section'])
+            
+            total_hours = sum(slot['end'] - slot['start'] for slot in assigned_slots)
+            hired = max_hours.get(ta_name, 0)
+            
+            daily_str = ', '.join(f"{day}: {hours}h" for day, hours in daily_breakdown.items()) if daily_breakdown else "None"
+            labs_str = ', '.join(sorted(labs_assigned)) if labs_assigned else "None"
+            
+            ta_results.append({
+                'TA Name': ta_name,
+                'Hours Assigned': total_hours,
+                'Remaining hours': max(0, hired - total_hours),
+                'Hours Hired For': hired,
+                'Daily Breakdown': daily_str,
+                'Labs Assigned': labs_str
+            })
+        
+        # Add TAs with no availability data
+        for ta_name in employees:
+            if ta_name not in sched:
+                hired = max_hours.get(ta_name, 0)
+                ta_results.append({
+                    'TA Name': ta_name,
+                    'Hours Assigned': 0,
+                    'Remaining hours': hired,
+                    'Hours Hired For': hired,
+                    'Daily Breakdown': 'None',
+                    'Labs Assigned': 'None'
+                })
+        
+        # Calculate solution statistics
+        fully_covered = sum(1 for s in slot_results if s['Needed'] == 0)
+        total_slots = len(slot_results)
+        coverage_percent = (fully_covered / total_slots * 100) if total_slots > 0 else 0
+        
+        processed_solutions.append({
+            'solution_number': i + 1,
+            'slot_results': slot_results,
+            'ta_results': ta_results,
+            'objective_value': solution_data['objective_value'],
+            'fully_covered_slots': fully_covered,
+            'total_slots': total_slots,
+            'coverage_percentage': coverage_percent,
+            'total_assigned_hours': sum(ta['Hours Assigned'] for ta in ta_results)
+        })
+    
+    log(f"🎯 Successfully processed {len(processed_solutions)} solution(s)")
+    return processed_solutions

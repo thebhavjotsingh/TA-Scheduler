@@ -14,10 +14,10 @@ from PySide6.QtCore import Qt, QTimer
 
 from .widgets import ModernFileDropZone, ModernCard
 from ..core.data_parser import parse_max_hours, parse_responses, parse_requirements
-from ..core.scheduler import solve_schedule
+from ..core.scheduler import solve_schedule, find_multiple_solutions
 from ..core.schedule_generator import generate_ta_schedule
 from ..config.constants import (
-    DEFAULT_APP_NAME, ICON_PATH, MAX_DAILY_HOURS, MAX_LABS_PER_TA, 
+    DEFAULT_APP_NAME, ICON_PATH, MAX_DAILY_HOURS, MAX_LABS_PER_TA, MIN_LABS_PER_TA,
     SLOT_OUTPUT_CSV, TA_OUTPUT_CSV
 )
 from ..config.styles import DARK_THEME
@@ -29,6 +29,7 @@ class App(QWidget):
     """
     def __init__(self):
         super().__init__()
+        self.multiple_solutions_data = []  # Store multiple solutions data
         self.setup_ui()
         self.setup_animations()
 
@@ -113,14 +114,28 @@ class App(QWidget):
         subtitle_button_row.addWidget(subtitle_label)
         subtitle_button_row.addStretch()
         
-        # Main action button - right aligned
+        # Button container for multiple buttons
+        button_container = QHBoxLayout()
+        button_container.setSpacing(8)
+        
+        # Find multiple solutions button
+        self.multiple_solutions_button = QPushButton("Find Alternative Solutions")
+        self.multiple_solutions_button.clicked.connect(self.find_multiple_solutions)
+        self.multiple_solutions_button.setMinimumHeight(25)
+        self.multiple_solutions_button.setMinimumWidth(150)
+        self.multiple_solutions_button.setProperty("class", "secondary")
+        self.multiple_solutions_button.setToolTip("Find up to 5 alternative scheduling solutions")
+        button_container.addWidget(self.multiple_solutions_button)
+        
+        # Main action button
         self.run_button = QPushButton("Run Scheduler")
         self.run_button.clicked.connect(self.run)
         self.run_button.setMinimumHeight(25)
-        # Remove max width to allow dynamic sizing based on text content
-        self.run_button.setMinimumWidth(100)  # Ensure minimum readability
+        self.run_button.setMinimumWidth(100)
         self.run_button.setProperty("class", "primary")
-        subtitle_button_row.addWidget(self.run_button)
+        button_container.addWidget(self.run_button)
+        
+        subtitle_button_row.addLayout(button_container)
         
         header_main_layout.addLayout(subtitle_button_row)
         
@@ -179,7 +194,7 @@ class App(QWidget):
         config_card = ModernCard("⚙️ Scheduling Constraints")
         
         config_layout = QHBoxLayout()
-        config_layout.setSpacing(24)
+        config_layout.setSpacing(20)
         config_layout.addStretch()  # Add stretch before content to center it
         
         # Max daily hours control
@@ -228,8 +243,32 @@ class App(QWidget):
         labs_group.addWidget(self.max_labs_input)
         labs_group.addWidget(labs_hint)
         
+        # Min labs control
+        min_labs_group = QVBoxLayout()
+        min_labs_group.setAlignment(Qt.AlignCenter)  # Center align the group
+        min_labs_label = QLabel("Min Labs per TA")
+        min_labs_label.setProperty("class", "control-label")
+        min_labs_label.setAlignment(Qt.AlignCenter)  # Center align the label
+        
+        self.min_labs_input = QLineEdit()
+        self.min_labs_input.setText(str(MIN_LABS_PER_TA))
+        self.min_labs_input.setToolTip("Minimum number of labs a TA should be assigned to")
+        self.min_labs_input.setMinimumWidth(80)
+        self.min_labs_input.setMaximumWidth(120)
+        self.min_labs_input.setAlignment(Qt.AlignCenter)  # Center align the text
+        self.min_labs_input.setPlaceholderText("e.g., 1")
+        
+        min_labs_hint = QLabel("Minimum assignment")
+        min_labs_hint.setProperty("class", "hint")
+        min_labs_hint.setAlignment(Qt.AlignCenter)  # Center align the hint
+        
+        min_labs_group.addWidget(min_labs_label)
+        min_labs_group.addWidget(self.min_labs_input)
+        min_labs_group.addWidget(min_labs_hint)
+        
         config_layout.addLayout(daily_group)
         config_layout.addLayout(labs_group)
+        config_layout.addLayout(min_labs_group)
         config_layout.addStretch()
         
         config_card.add_layout(config_layout)
@@ -286,18 +325,26 @@ class App(QWidget):
         
         return msg_box
 
-    def show_progress(self):
+    def show_progress(self, mode="single"):
         """Show progress bar with animation"""
         self.progress_bar.setVisible(True)
         self.progress_bar.setValue(0)
         self.run_button.setEnabled(False)
-        self.run_button.setText("⏳ Processing...")
+        self.multiple_solutions_button.setEnabled(False)
+        
+        if mode == "multiple":
+            self.multiple_solutions_button.setText("🔍 Finding Solutions...")
+            self.run_button.setText("⏳ Processing...")
+        else:
+            self.run_button.setText("⏳ Processing...")
 
     def hide_progress(self):
-        """Hide progress bar and restore button"""
+        """Hide progress bar and restore buttons"""
         self.progress_bar.setVisible(False)
         self.run_button.setEnabled(True)
+        self.multiple_solutions_button.setEnabled(True)
         self.run_button.setText("Run Scheduler")
+        self.multiple_solutions_button.setText("Find Alternative Solutions")
 
     def update_button_text(self, text):
         """Update button text and let it resize dynamically"""
@@ -440,13 +487,28 @@ class App(QWidget):
                 msg_box.exec()
                 return
             
-            self.log(f"⚙️ Constraints: {max_daily_hours}h/day max, {max_labs_per_ta} labs/TA max")
+            try:
+                min_labs_per_ta = int(self.min_labs_input.text().strip())
+                if min_labs_per_ta < 0:
+                    raise ValueError("Min labs per TA must be non-negative")
+                if min_labs_per_ta > max_labs_per_ta:
+                    raise ValueError("Min labs per TA cannot exceed Max labs per TA")
+            except ValueError:
+                msg_box = self.create_wide_message_box(
+                    QMessageBox.Warning, 
+                    "Invalid Input", 
+                    "Please enter a valid number for Min Labs per TA (must be ≤ Max Labs per TA)"
+                )
+                msg_box.exec()
+                return
+            
+            self.log(f"⚙️ Constraints: {max_daily_hours}h/day max, {min_labs_per_ta}-{max_labs_per_ta} labs/TA range")
             self.log("")
                 
             # Solve the scheduling problem
             self.progress_bar.setValue(95)
             slot_res, ta_res = solve_schedule(emps, responses_df, maxh, slots, 
-                                            max_daily_hours, max_labs_per_ta, self.log)
+                                            max_daily_hours, max_labs_per_ta, min_labs_per_ta, self.log)
 
             self.progress_bar.setValue(100)
             self.log("")
@@ -579,6 +641,353 @@ class App(QWidget):
             self.log(f"❌ Error: {str(e)}")
             self.log("Please check your CSV files and try again.")
 
+    def find_multiple_solutions(self):
+        """Find multiple alternative solutions to the scheduling problem"""
+        # Reuse the same validation logic as run()
+        max_path = self.max_drop_zone.get_file_path()
+        resp_path = self.resp_drop_zone.get_file_path()
+        req_path = self.req_drop_zone.get_file_path()
+
+        # Validate selected file paths
+        if not (max_path and max_path.endswith('.csv') and os.path.exists(max_path)):
+            msg_box = self.create_wide_message_box(
+                QMessageBox.Warning, 
+                DEFAULT_APP_NAME, 
+                "Please select a valid Max Availability CSV file."
+            )
+            msg_box.exec()
+            return
+        if not (resp_path and resp_path.endswith('.csv') and os.path.exists(resp_path)):
+            msg_box = self.create_wide_message_box(
+                QMessageBox.Warning, 
+                DEFAULT_APP_NAME, 
+                "Please select a valid Responses CSV file."
+            )
+            msg_box.exec()
+            return
+        if not (req_path and req_path.endswith('.csv') and os.path.exists(req_path)):
+            msg_box = self.create_wide_message_box(
+                QMessageBox.Warning, 
+                DEFAULT_APP_NAME, 
+                "Please select a valid Requirements CSV file."
+            )
+            msg_box.exec()
+            return
+
+        # Show progress and clear log
+        self.show_progress("multiple")
+        self.log_area.clear()
+        
+        # Progress timer
+        progress_timer = QTimer()
+        progress_value = 0
+        
+        def update_progress():
+            nonlocal progress_value
+            progress_value += 5
+            self.progress_bar.setValue(min(progress_value, 95))
+            if progress_value >= 95:
+                progress_timer.stop()
+        
+        progress_timer.timeout.connect(update_progress)
+        progress_timer.start(200)
+        
+        try:
+            # Parse input CSVs
+            self.log("🔄 Loading and parsing CSV files...")
+            emps, maxh = parse_max_hours(max_path)
+            responses_df = pd.read_csv(resp_path)
+            slots = parse_requirements(req_path)
+            
+            # Check for missing availability submissions
+            availability, missing_tas = parse_responses(resp_path, emps)
+            
+            if missing_tas:
+                self.log("")
+                self.log("⚠️ MISSING AVAILABILITY SUBMISSIONS:")
+                self.log("=" * 40)
+                for ta in missing_tas:
+                    self.log(f"❌ {ta} - No availability submitted")
+                self.log(f"📊 Total missing: {len(missing_tas)} out of {len(emps)} TAs")
+                self.log("")
+            
+            if not slots:
+                raise ValueError('No slots to schedule. Please check your Requirements CSV file.')
+                
+            self.log(f"✅ Loaded {len(emps)} TAs, {len(slots)} slots")
+            self.log("🔍 Searching for multiple solutions using CP-SAT...")
+            self.log("")
+            
+            # Get constraint values from GUI with validation
+            try:
+                max_daily_hours = int(self.daily_hours_input.text().strip())
+                if max_daily_hours <= 0:
+                    raise ValueError("Max daily hours must be positive")
+            except ValueError:
+                progress_timer.stop()
+                self.hide_progress()
+                msg_box = self.create_wide_message_box(
+                    QMessageBox.Warning, 
+                    "Invalid Input", 
+                    "Please enter a valid positive number for Max Daily Hours"
+                )
+                msg_box.exec()
+                return
+            
+            try:
+                max_labs_per_ta = int(self.max_labs_input.text().strip())
+                if max_labs_per_ta <= 0:
+                    raise ValueError("Max labs per TA must be positive")
+            except ValueError:
+                progress_timer.stop()
+                self.hide_progress()
+                msg_box = self.create_wide_message_box(
+                    QMessageBox.Warning, 
+                    "Invalid Input", 
+                    "Please enter a valid positive number for Max Labs per TA"
+                )
+                msg_box.exec()
+                return
+            
+            try:
+                min_labs_per_ta = int(self.min_labs_input.text().strip())
+                if min_labs_per_ta < 0:
+                    raise ValueError("Min labs per TA must be non-negative")
+                if min_labs_per_ta > max_labs_per_ta:
+                    raise ValueError("Min labs per TA cannot exceed Max labs per TA")
+            except ValueError:
+                progress_timer.stop()
+                self.hide_progress()
+                msg_box = self.create_wide_message_box(
+                    QMessageBox.Warning, 
+                    "Invalid Input", 
+                    "Please enter a valid number for Min Labs per TA (must be ≤ Max Labs per TA)"
+                )
+                msg_box.exec()
+                return
+            
+            self.log(f"⚙️ Constraints: {max_daily_hours}h/day max, {min_labs_per_ta}-{max_labs_per_ta} labs/TA range")
+            self.log("")
+                
+            # Find multiple solutions
+            self.progress_bar.setValue(95)
+            solutions = find_multiple_solutions(emps, responses_df, maxh, slots, 
+                                              max_daily_hours, max_labs_per_ta, min_labs_per_ta, 
+                                              max_solutions=5, log_func=self.log)
+
+            self.progress_bar.setValue(100)
+            
+            if not solutions:
+                self.log("❌ No solutions found! Please check your constraints and data.")
+                progress_timer.stop()
+                QTimer.singleShot(1000, self.hide_progress)
+                return
+            
+            self.log("")
+            self.log("🎯 MULTIPLE SOLUTIONS FOUND:")
+            self.log("=" * 60)
+            
+            # Display summary of all solutions
+            for i, solution in enumerate(solutions):
+                self.log(f"\n📋 SOLUTION {solution['solution_number']}:")
+                self.log(f"   💼 Total assigned hours: {solution['total_assigned_hours']}")
+                self.log(f"   ✅ Fully covered slots: {solution['fully_covered_slots']}/{solution['total_slots']} ({solution['coverage_percentage']:.1f}%)")
+                
+                # Show key differences in assignments
+                if i == 0:
+                    self.log("   📌 (Primary solution - detailed view below)")
+                else:
+                    # Compare with first solution to highlight differences
+                    primary_assignments = set()
+                    current_assignments = set()
+                    
+                    for ta in solutions[0]['ta_results']:
+                        if ta['Hours Assigned'] > 0:
+                            primary_assignments.add((ta['TA Name'], ta['Labs Assigned']))
+                    
+                    for ta in solution['ta_results']:
+                        if ta['Hours Assigned'] > 0:
+                            current_assignments.add((ta['TA Name'], ta['Labs Assigned']))
+                    
+                    differences = current_assignments.symmetric_difference(primary_assignments)
+                    if differences:
+                        self.log(f"   🔄 Key differences: {len(differences)} assignment changes")
+                    else:
+                        self.log("   🔁 Similar assignment pattern")
+            
+            # Show detailed view of the first (primary) solution
+            self.log("")
+            self.log("📋 DETAILED VIEW - PRIMARY SOLUTION:")
+            self.log("=" * 50)
+            
+            primary_solution = solutions[0]
+            
+            # Display slot assignment summary
+            for s in primary_solution['slot_results']:
+                section = s['Lab Section'] if s['Lab Section'] else f"Slot {primary_solution['slot_results'].index(s)}"
+                assigned_count = s['Assigned Count']
+                required_count = s['Required Count']
+                time_info = f"({s['Day']} {s['Start Time']}-{s['End Time']})"
+                
+                if s['TAs Assigned'] and s['Needed'] == 0:
+                    self.log(f"✅ {section} {time_info}: FULLY COVERED - {s['TAs Assigned']} ({assigned_count}/{required_count})")
+                elif s['TAs Assigned']:
+                    self.log(f"⚠️ {section} {time_info}: PARTIALLY FILLED - {s['TAs Assigned']} ({assigned_count}/{required_count}, need {s['Needed']} more)")
+                else:
+                    self.log(f"❌ {section} {time_info}: UNFILLED - Need {s['Needed']} TAs ({assigned_count}/{required_count})")
+            
+            self.log("")
+            self.log("👥 TA ASSIGNMENTS (Primary Solution):")
+            for t in primary_solution['ta_results']:
+                if t['Hours Assigned'] > 0:
+                    daily_info = f" ({t['Daily Breakdown']})" if t['Daily Breakdown'] != "None" else ""
+                    labs_info = f" - Labs: {t['Labs Assigned']}" if t['Labs Assigned'] != "None" else ""
+                    utilization = f"{t['Hours Assigned']}/{t['Hours Hired For']}"
+                    self.log(f"   • {t['TA Name']}: {utilization}h assigned{daily_info}{labs_info}")
+
+            # Complete progress
+            progress_timer.stop()
+            self.progress_bar.setValue(100)
+            QTimer.singleShot(1000, self.hide_progress)
+
+            # Store solutions for potential export
+            self.multiple_solutions_data = solutions
+            
+            # Offer to show solution comparison
+            self.log("")
+            self.log("💡 TIP: You can compare solutions or export different alternatives.")
+            self.show_solution_comparison_dialog(solutions)
+
+        except Exception as e:
+            # Enhanced error handling
+            progress_timer.stop()
+            self.hide_progress()
+            
+            import traceback
+            
+            # Create modern error dialog
+            error_msg = self.create_wide_message_box(
+                QMessageBox.Critical, 
+                "Scheduling Error", 
+                f"An error occurred while finding solutions:\n\n{str(e)}\n\nWould you like to see details or exit?"
+            )
+            
+            details_btn = error_msg.addButton("Show Details", QMessageBox.ActionRole)
+            exit_btn = error_msg.addButton("Exit", QMessageBox.DestructiveRole)
+            continue_btn = error_msg.addButton("Continue", QMessageBox.AcceptRole)
+            
+            error_msg.exec()
+            
+            if error_msg.clickedButton() == details_btn:
+                detail_dialog = QMessageBox(self)
+                detail_dialog.setWindowTitle("Error Details")
+                detail_dialog.setText(f"Full error traceback:\n\n{traceback.format_exc()}")
+                detail_dialog.setStandardButtons(QMessageBox.Ok)
+                detail_dialog.exec()
+            elif error_msg.clickedButton() == exit_btn:
+                sys.exit(1)
+            
+            # Log error in the UI as well
+            self.log(f"❌ Error: {str(e)}")
+            self.log("Please check your CSV files and try again.")
+
+    def show_solution_comparison_dialog(self, solutions):
+        """Show dialog to compare and select from multiple solutions"""
+        if len(solutions) <= 1:
+            return
+            
+        msg_box = self.create_wide_message_box(
+            QMessageBox.Information,
+            "Multiple Solutions Found",
+            f"Found {len(solutions)} alternative solutions! Each solution may have different TA assignments while meeting your constraints.\n\nWould you like to:"
+        )
+        
+        view_btn = msg_box.addButton("View All Solutions", QMessageBox.ActionRole)
+        export_btn = msg_box.addButton("Export Solutions", QMessageBox.ActionRole)
+        continue_btn = msg_box.addButton("Continue with Primary", QMessageBox.AcceptRole)
+        
+        msg_box.exec()
+        
+        if msg_box.clickedButton() == view_btn:
+            self.show_detailed_solutions_view(solutions)
+        elif msg_box.clickedButton() == export_btn:
+            self.export_multiple_solutions(solutions)
+
+    def show_detailed_solutions_view(self, solutions):
+        """Show detailed view of all solutions in the log area"""
+        self.log_area.clear()
+        self.log("🔍 DETAILED VIEW - ALL SOLUTIONS:")
+        self.log("=" * 60)
+        
+        for solution in solutions:
+            self.log(f"\n" + "="*50)
+            self.log(f"📋 SOLUTION {solution['solution_number']} DETAILS:")
+            self.log("="*50)
+            
+            # Solution statistics
+            self.log(f"💼 Total assigned hours: {solution['total_assigned_hours']}")
+            self.log(f"✅ Coverage: {solution['fully_covered_slots']}/{solution['total_slots']} slots ({solution['coverage_percentage']:.1f}%)")
+            self.log("")
+            
+            # Slot results
+            self.log("📍 SLOT ASSIGNMENTS:")
+            for s in solution['slot_results']:
+                section = s['Lab Section'] if s['Lab Section'] else f"Slot {solution['slot_results'].index(s)}"
+                assigned_count = s['Assigned Count']
+                required_count = s['Required Count']
+                time_info = f"({s['Day']} {s['Start Time']}-{s['End Time']})"
+                
+                if s['TAs Assigned'] and s['Needed'] == 0:
+                    self.log(f"  ✅ {section} {time_info}: {s['TAs Assigned']} ({assigned_count}/{required_count})")
+                elif s['TAs Assigned']:
+                    self.log(f"  ⚠️ {section} {time_info}: {s['TAs Assigned']} ({assigned_count}/{required_count}, need {s['Needed']} more)")
+                else:
+                    self.log(f"  ❌ {section} {time_info}: UNFILLED ({assigned_count}/{required_count})")
+            
+            self.log("")
+            self.log("👥 TA ASSIGNMENTS:")
+            for t in solution['ta_results']:
+                if t['Hours Assigned'] > 0:
+                    daily_info = f" ({t['Daily Breakdown']})" if t['Daily Breakdown'] != "None" else ""
+                    labs_info = f" - Labs: {t['Labs Assigned']}" if t['Labs Assigned'] != "None" else ""
+                    utilization = f"{t['Hours Assigned']}/{t['Hours Hired For']}"
+                    self.log(f"  • {t['TA Name']}: {utilization}h{daily_info}{labs_info}")
+
+    def export_multiple_solutions(self, solutions):
+        """Export multiple solutions to separate files"""
+        # Get directory for export
+        dir_path = QFileDialog.getExistingDirectory(
+            self, 
+            "Select Export Directory for Multiple Solutions",
+            options=QFileDialog.ShowDirsOnly
+        )
+        
+        if dir_path:
+            try:
+                for solution in solutions:
+                    solution_num = solution['solution_number']
+                    
+                    # Export slot results
+                    slot_df = pd.DataFrame(solution['slot_results']).fillna('')
+                    slot_filename = f"slot_summary_solution_{solution_num}.csv"
+                    slot_df.to_csv(os.path.join(dir_path, slot_filename), index=False)
+                    
+                    # Export TA results
+                    ta_df = pd.DataFrame(solution['ta_results']).fillna('')
+                    ta_filename = f"ta_summary_solution_{solution_num}.csv"
+                    ta_df.to_csv(os.path.join(dir_path, ta_filename), index=False)
+                
+                self.log(f"\n💾 All {len(solutions)} solutions exported to: {dir_path}")
+                self.log("📁 Files created:")
+                for solution in solutions:
+                    solution_num = solution['solution_number']
+                    self.log(f"  • Solution {solution_num}: slot_summary_solution_{solution_num}.csv, ta_summary_solution_{solution_num}.csv")
+                    
+            except Exception as e:
+                self.log(f"\n❌ Export error: {str(e)}")
+        else:
+            self.log("\n❌ Export canceled: no directory selected.")
+
     def show_excel_generation_dialog(self, default_dir, ta_df, responses_df):
         """Show dialog for Excel schedule generation"""
         msg_box = self.create_wide_message_box(
@@ -629,8 +1038,8 @@ class App(QWidget):
                         f"Excel schedule mapping successfully created!\n\n"
                         f"Location: {excel_dir}\n"
                         f"File: {os.path.basename(excel_file)}\n\n"
-                        f"VBA files for dynamic updates are also included."
-                        f"⚠️ Refer Instructions in the log for enabling VBA macros"
+                        f"VBA files for dynamic updates are also included.\n\n"
+                        f"⚠️ Refer Instructions in the log for enabling VBA\nmacros."
                     )
                     completion_msg.setStandardButtons(QMessageBox.Ok)
                     completion_msg.exec()

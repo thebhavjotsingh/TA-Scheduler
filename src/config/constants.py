@@ -14,6 +14,7 @@ TA_OUTPUT_CSV = "ta_summary.csv"
 # --- Scheduling constraints ---
 MAX_DAILY_HOURS = 4  # Maximum hours a TA can be assigned in a single day
 MAX_LABS_PER_TA = 3  # Maximum number of labs a TA can be assigned to
+MIN_LABS_PER_TA = 1  # Minimum number of labs a TA should be assigned to
 
 # --- GUI constants ---
 def get_icon_path():

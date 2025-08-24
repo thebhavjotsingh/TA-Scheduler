@@ -297,12 +297,13 @@
               interface or browse buttons
             </li>
             <li>
-              <strong>Configure Constraints:</strong> Set daily hour limits and
-              max labs per TA (defaults: 8h/day, 2 labs max)
+              <strong>Configure Constraints:</strong> Set daily hour limits,
+              min/max labs per TA (defaults: 4h/day, 1-3 labs range)
             </li>
             <li>
-              <strong>Run Optimization:</strong> Click "Run Scheduler" to
-              execute the CP-SAT constraint programming solver
+              <strong>Run Optimization:</strong> Choose "Run Scheduler" for best
+              single solution, or "Find Alternative Solutions" for multiple
+              options
             </li>
             <li>
               <strong>Review Results:</strong> Analyze slot coverage, TA
@@ -341,7 +342,18 @@
               <td>3 labs</td>
               <td>Maximum number of different lab sections per TA</td>
             </tr>
+            <tr>
+              <td>Min Labs per TA</td>
+              <td>1 lab</td>
+              <td>Minimum number of lab assignments each TA should receive</td>
+            </tr>
           </table>
+
+          <div class="success">
+            <strong>New in v3.1:</strong> Multiple solutions feature allows you
+            to find up to 5 alternative optimal scheduling solutions, providing
+            flexibility in TA assignments while meeting all constraints.
+          </div>
 
           <div class="warning">
             <strong>Installation Options:</strong><br />
@@ -454,6 +466,13 @@
               <p>
                 Comprehensive input validation with detailed error reporting and
                 troubleshooting guidance
+              </p>
+            </div>
+            <div class="feature">
+              <h3>Multiple Solutions</h3>
+              <p>
+                Find up to 5 alternative optimal scheduling solutions to compare
+                different TA assignment patterns
               </p>
             </div>
           </div>

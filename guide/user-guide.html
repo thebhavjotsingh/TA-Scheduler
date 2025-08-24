@@ -251,11 +251,15 @@
           <ul>
             <li>
               <strong>Max Daily Hours:</strong> Maximum hours any TA can work
-              per day (default: 8)
+              per day (default: 4)
             </li>
             <li>
               <strong>Max Labs per TA:</strong> Maximum different lab sections
-              per TA (default: 2)
+              per TA (default: 3)
+            </li>
+            <li>
+              <strong>Min Labs per TA:</strong> Minimum lab assignments each TA
+              should receive (default: 1)
             </li>
           </ul>
           <div class="note">
@@ -265,6 +269,23 @@
         </div>
 
         <div class="section">
+          <h2>Running the Scheduler</h2>
+          <ul>
+            <li>
+              <strong>Run Scheduler:</strong> Finds the best single solution for
+              your constraints
+            </li>
+            <li>
+              <strong>Find Alternative Solutions:</strong> Discovers up to 5
+              different optimal solutions, giving you choices in TA assignments
+            </li>
+          </ul>
+          <div class="note">
+            Use "Find Alternative Solutions" when you want to see different ways
+            to assign TAs while meeting the same constraints. This is helpful
+            for comparing assignment patterns.
+          </div>
+
           <h2>Understanding Results</h2>
           <ul>
             <li><strong>Fully Covered:</strong> All required TAs assigned</li>
@@ -283,6 +304,11 @@
             <li>
               <strong>Excel Generation:</strong> Creates interactive schedules
               with individual TA sheets
+            </li>
+            <li>
+              <strong>Multiple Solutions Export:</strong> When using "Find
+              Alternative Solutions", you can export all solutions as separate
+              CSV files
             </li>
           </ul>
         </div>

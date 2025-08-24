@@ -6,8 +6,9 @@ A modern desktop application for assigning Teaching Assistants (TAs) to lab sect
 
 - **Modern GUI**: Clean, dark-themed interface with drag-and-drop file support
 - **Smart Optimization**: Uses Google OR-Tools CP-SAT solver for efficient scheduling
+- **Multiple Solutions**: Find up to 5 alternative optimal scheduling solutions for comparison
 - **Comprehensive Reporting**: Detailed slot coverage and TA assignment summaries
-- **Configurable Constraints**: Adjustable daily hour limits and lab assignment limits
+- **Configurable Constraints**: Adjustable daily hour limits and min/max lab assignment ranges
 - **CSV Integration**: Easy import/export of scheduling data
 - **Partial Coverage**: Supports optimal partial slot filling when full coverage isn't possible
 
